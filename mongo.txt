@@ -1,0 +1,100 @@
+
+==========================
+db.categories.insert([
+{
+_id:'c1',
+name:"sci-f1"
+},
+{_id:'c2',
+name:'romance'
+}
+])
+
+
+db.books.insert([
+{
+_id:'b1',
+name:"Groovy Book",
+category:"c1",
+authors:['a1']
+},
+{
+_id:'b2',
+name:"JAVa Book",
+category:"c2",
+authors:['a1','a2']
+}
+])
+
+
+db.lendings.insert([
+{
+_id:'11',
+book:'b1',
+date: new Date('01/01/11'),
+lendingBy:'jose'
+},
+{
+_id:'12',
+book:'b1',
+date: new Date('02/02/12'),
+lendingBy:'maria'
+}
+]);
+
+db.authors.insert([
+{
+_id:'a1',
+name:{first:'orlando',last:'becerra'},
+age: 27
+},
+{
+_id:'a2',
+name:{first:'mayra',last:'sanchez'},
+age: 21
+}
+]);
+
+
+db.books.find().forEach(
+	function (newBook){
+			newBook.category =db.categories.findOne({"_id":newBook.category});
+			newBook.lendings =db.lendings.find({"book":newBook._id}).toArray();
+			newBook.authors = db.authors.find({"_id":{$in:newBook.authors}}).toArray();
+			db.booksReloaded.insert(newBook);
+	}
+);
+
+db.booksReloaded.find().pretty()
+
+
+================
+
+db.leftCollection.aggregate(
+[{
+
+	$lookUp:
+	{
+		from:"rightCollection",
+		localField:"leftVal",
+		foreignField: "rightVal",
+		as:"embeddedData"
+	}
+}]
+
+)
+
+
+
+db.inventory.aggregate(
+	[{
+
+		"$lookUp":
+		{
+			from:"orders",
+			localField:"sku",
+			foreignField: "item",
+			as:"embeddedData"
+		}
+	}]
+)
